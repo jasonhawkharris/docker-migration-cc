@@ -89,4 +89,41 @@ Once your local instance is deployed, create an account, then add a codehost and
 	```
 	psql --username=sg -f /tmp/sourcegraph_db.out postgres
 	```
+	Open up a `psql` session inside the `pgsql` container:
+	```
+	psql --username=sg postgres
+
+	```
+	Apply the following alteration to the database:
+	```
+	DROP DATABASE sg;
+	ALTER DATABASE sourcegraph RENAME TO sg;
+	ALTER DATABASE sg OWNER TO sg;
+	```
+	End the psql session with `\q`, then exit the `pgsql` shell session by typing `exit`.
+8. Create a shell session inside the `codeintel-db` container
+	```
+	docker exec -it codeintel-db /bin/sh
+	```
+	Restore the Database dump:
+	```
+	psql --username=sg -f /tmp/codeintel_db.out postgres
+	```
+	Open up a `psql` session inside the `pgsql` container:
+	```
+	psql --username=sg postgres
+
+	```
+	Apply the following alteration to the database:
+	```
+	DROP DATABASE sg;
+	ALTER DATABASE "sourcegraph-codeintel" RENAME TO sg;
+	ALTER DATABASE sg OWNER TO sg;
+	```
+	End the psql session with `\q`, then exit the `pgsql` shell session by typing `exit`.
+9. Restart the rest of the containers. Make sure you're in the directory that contains the `docker-compose` definition before doing so:
+	```
+	docker-compose -f docker-compose.yaml up -d
+	```
+10. Navigate to the external url associated with your gcp instance and attempt to login using the same credentials you used with your local instance. If you've done everything correctly, it should successfully validate your credentials and all your repos should've started cloning. *NOTE: The url may not immediately be available. It can take up to 15 minutes for the url to start working.* 
 
